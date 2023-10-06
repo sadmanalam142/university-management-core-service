@@ -10,12 +10,12 @@ const createSemester = async (
   payload: AcademicSemester
 ): Promise<AcademicSemester> => {
   const result = await prisma.academicSemester.create({
-    data: payload,
-  });
+    data: payload
+  })
   return result;
 };
 
-const getAllSemester = async (
+const getAllSemesters = async (
   filters: IAcademicSemesterFilters,
   options: IPaginationOptions
 ): Promise<IGenericResponse<AcademicSemester[]>> => {
@@ -107,7 +107,7 @@ const deleteSemester = async (
 
 export const AcademicSemesterService = {
   createSemester,
-  getAllSemester,
+  getAllSemesters,
   getSingleSemester,
   updateSemester,
   deleteSemester

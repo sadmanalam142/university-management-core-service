@@ -19,10 +19,10 @@ const createSemester = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllSemester = catchAsync(async (req: Request, res: Response) => {
+const getAllSemesters = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, academicSemesterFilterableFields)
   const options = pick(req.query, paginationFields)
-  const result = await AcademicSemesterService.getAllSemester(filters, options);
+  const result = await AcademicSemesterService.getAllSemesters(filters, options);
 
   sendResponse<AcademicSemester[]>(res, {
     statusCode: httpStatus.OK,
@@ -70,7 +70,7 @@ const deleteSemester = catchAsync(async (req: Request, res: Response) => {
 
 export const AcademicSemesterController = {
   createSemester,
-  getAllSemester,
+  getAllSemesters,
   getSingleSemester,
   updateSemester,
   deleteSemester

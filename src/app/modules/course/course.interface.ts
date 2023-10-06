@@ -6,6 +6,10 @@ export type ICourseCreateData = {
 };
 
 export type ICourseResponseData = {
-    courseId: string;
-    isDeleted?: null
-  }
+  courseId: string;
+  isDeleted?: null;
+};
+
+export type ICourseFilterRequest = {
+  searchTerm?: string | undefined;
+};
