@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../../shared/catchAsync';
-// import { AcademicSemesterService } from './academicSemester.service';
 import sendResponse from '../../../shared/sendResponse';
 import { OfferedCourse } from '@prisma/client';
 import httpStatus from 'http-status';
@@ -8,9 +7,6 @@ import { OfferedCourseService } from './offeredCourse.service';
 import pick from '../../../shared/pick';
 import { paginationFields } from '../../../constants/pagination';
 import { offeredCourseFilterableFields } from './offeredCourse.constant';
-// import pick from '../../../shared/pick';
-// import { academicSemesterFilterableFields } from './academicSemester.constant';
-// import { paginationFields } from '../../../constants/pagination';
 
 const createOfferedCourse = catchAsync(async (req: Request, res: Response) => {
   const result = await OfferedCourseService.createOfferedCourse(req.body);

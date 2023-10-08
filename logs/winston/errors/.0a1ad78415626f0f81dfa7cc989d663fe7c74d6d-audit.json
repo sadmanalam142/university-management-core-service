@@ -169,6 +169,41 @@
             "date": 1696633203156,
             "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-07-10-05-error.log",
             "hash": "07acfadd6d91786ee60e63971f6dead6920a3c1053d8e28dc0f240f753ce0ca6"
+        },
+        {
+            "date": 1696689703432,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-07-10-20-error.log",
+            "hash": "cb0d7fa3a89561f70a11cd832081bc20843fb7c7cbe5fa01f76658598bcda169"
+        },
+        {
+            "date": 1696717629757,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-08-10-04-error.log",
+            "hash": "da92d928098ced188748ac760ad3594701defc7cb36568b2a80de005752dc243"
+        },
+        {
+            "date": 1696781297774,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-08-10-22-error.log",
+            "hash": "cf0145721a81859ab9e92103bcfbf8662af12b8014714d0488c202de2191ce9c"
+        },
+        {
+            "date": 1696784406612,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-08-10-23-error.log",
+            "hash": "d369a9e12a02f4db631fefe6409272bdca596b7580e804eb6f19c85819608261"
+        },
+        {
+            "date": 1696790808257,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-09-10-00-error.log",
+            "hash": "af23b834cf85dd1aa5055fd05a3ed4e24270d9154e5679a87c96176b845541b5"
+        },
+        {
+            "date": 1696793743480,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-09-10-01-error.log",
+            "hash": "e5ba65068a7d6a8412b80dd63f7fc306ffc9ae0b4669f78ef43a91d28362748a"
+        },
+        {
+            "date": 1696795341323,
+            "name": "C:\\Next-Level-Web-Development\\university-management-core-service\\logs\\winston\\errors\\phu-2023-09-10-02-error.log",
+            "hash": "39e288d4b81e240af9919523008ec2cec295412739a9dedc725c62301ad2d858"
         }
     ],
     "hashType": "sha256"

@@ -38,7 +38,7 @@ const createOfferedCourse = async (
         include: {
           academicDepartment: true,
           semesterRegistration: true,
-          coures: true,
+          course: true,
         },
       });
       result.push(insertOfferedCoures);
@@ -83,7 +83,7 @@ const getAllOfferedCourses = async (
     include: {
       academicDepartment: true,
       semesterRegistration: true,
-      coures: true,
+      course: true,
     },
     orderBy:
       sortBy && sortOrder
@@ -117,7 +117,7 @@ const getSinglOfferedCourse = async (
     include: {
       academicDepartment: true,
       semesterRegistration: true,
-      coures: true,
+      course: true,
     },
   });
   return result;
@@ -135,7 +135,7 @@ const updatOfferedCourse = async (
     include: {
       academicDepartment: true,
       semesterRegistration: true,
-      coures: true,
+      course: true,
     },
   });
   return result;
@@ -149,7 +149,7 @@ const deleteOfferedCourse = async (id: string): Promise<OfferedCourse> => {
     include: {
       academicDepartment: true,
       semesterRegistration: true,
-      coures: true,
+      course: true,
     },
   });
   return result;
