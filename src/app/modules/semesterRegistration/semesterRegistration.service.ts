@@ -11,8 +11,12 @@ import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import ApiError from '../../../errors/ApiError';
 import httpStatus from 'http-status';
-import { ISemesterRegistrationFilters } from './semesterRegistration.interface';
+import {
+  IEnrollCoursePayload,
+  ISemesterRegistrationFilters,
+} from './semesterRegistration.interface';
 import { semesterRegistrationSearchableFields } from './semesterRegistration.contant';
+import { studentSemesterRegistrationCourseService } from '../studentSemesterRegistrationCourse/studentSemesterRegistrationCourse.service';
 
 const createSemesterRegistration = async (
   payload: SemesterRegistration
@@ -180,68 +184,93 @@ const deleteSemesterRegistration = async (
   return result;
 };
 
-
 const createStartRegistration = async (
   authId: string
 ): Promise<{
-  studentRegistration: StudentSemesterRegistration | null,
-  student: Student | null,
-  semesterRegistration: SemesterRegistration | null
+  studentRegistration: StudentSemesterRegistration | null;
+  student: Student | null;
+  semesterRegistration: SemesterRegistration | null;
 }> => {
   const studentInfo = await prisma.student.findFirst({
     where: {
-      studentId: authId
-    }
-  })
+      studentId: authId,
+    },
+  });
 
-  if(!studentInfo){
-    throw new ApiError(httpStatus.BAD_REQUEST, "Student Info not found")
+  if (!studentInfo) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Student Info not found');
   }
 
   const semesterRegistrationInfo = await prisma.semesterRegistration.findFirst({
     where: {
       status: {
-        in: [SemesterRegistrationStatus.UPCOMING, SemesterRegistrationStatus.ONGOING]
-      }
-    }
-  })
+        in: [
+          SemesterRegistrationStatus.UPCOMING,
+          SemesterRegistrationStatus.ONGOING,
+        ],
+      },
+    },
+  });
 
-  if(semesterRegistrationInfo?.status === SemesterRegistrationStatus.UPCOMING){
-      throw new ApiError(httpStatus.BAD_REQUEST, "Registration is not started yet")
-    }
+  if (
+    semesterRegistrationInfo?.status === SemesterRegistrationStatus.UPCOMING
+  ) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Registration is not started yet'
+    );
+  }
 
-    let studentRegistration = await prisma.studentSemesterRegistration.findFirst({
-      where: {
+  let studentRegistration = await prisma.studentSemesterRegistration.findFirst({
+    where: {
+      student: {
+        id: studentInfo?.id,
+      },
+      semesterRegistration: {
+        id: semesterRegistrationInfo?.id,
+      },
+    },
+  });
+
+  if (!studentRegistration) {
+    studentRegistration = await prisma.studentSemesterRegistration.create({
+      data: {
         student: {
-            id: studentInfo?.id
+          connect: {
+            id: studentInfo?.id,
           },
-          semesterRegistration : {
-              id: semesterRegistrationInfo?.id
-          }
-        }
-      })
-
-      if(!studentRegistration){
-        studentRegistration = await prisma.studentSemesterRegistration.create({
-          data: {
-            student: {
-              connect: {
-                id: studentInfo?.id
-              }
-            },
-            semesterRegistration : {
-              connect: {
-                id: semesterRegistrationInfo?.id
-              }
-            }
-          }
-        })
-      }
+        },
+        semesterRegistration: {
+          connect: {
+            id: semesterRegistrationInfo?.id,
+          },
+        },
+      },
+    });
+  }
   return {
     studentRegistration,
     student: studentInfo,
     semesterRegistration: semesterRegistrationInfo,
-  }
+  };
+};
+
+const enrollIntoCourse = async (
+  authId: string,
+  payload: IEnrollCoursePayload
+): Promise<{
+  message: string;
+}> => {
+  return studentSemesterRegistrationCourseService.enrollIntoCourse(authId, payload)
+};
+
+const withdrawFromCourse = async (
+  authId: string,
+  payload: IEnrollCoursePayload
+): Promise<{
+  message: string;
+}> => {
+  return studentSemesterRegistrationCourseService.withdrawFromCourse(authId, payload)
 };
 
 export const SemesterRagistrationService = {
@@ -250,5 +279,7 @@ export const SemesterRagistrationService = {
   getSingleSemesterRegistration,
   updateSemesterRegistration,
   deleteSemesterRegistration,
-  createStartRegistration
+  createStartRegistration,
+  enrollIntoCourse,
+  withdrawFromCourse,
 };
