@@ -2,6 +2,8 @@ import {
   Prisma,
   SemesterRegistration,
   SemesterRegistrationStatus,
+  Student,
+  StudentSemesterRegistration,
 } from '@prisma/client';
 import prisma from '../../../shared/prisma';
 import { IGenericResponse } from '../../../interfaces/common';
@@ -178,10 +180,75 @@ const deleteSemesterRegistration = async (
   return result;
 };
 
+
+const createStartRegistration = async (
+  authId: string
+): Promise<{
+  studentRegistration: StudentSemesterRegistration | null,
+  student: Student | null,
+  semesterRegistration: SemesterRegistration | null
+}> => {
+  const studentInfo = await prisma.student.findFirst({
+    where: {
+      studentId: authId
+    }
+  })
+
+  if(!studentInfo){
+    throw new ApiError(httpStatus.BAD_REQUEST, "Student Info not found")
+  }
+
+  const semesterRegistrationInfo = await prisma.semesterRegistration.findFirst({
+    where: {
+      status: {
+        in: [SemesterRegistrationStatus.UPCOMING, SemesterRegistrationStatus.ONGOING]
+      }
+    }
+  })
+
+  if(semesterRegistrationInfo?.status === SemesterRegistrationStatus.UPCOMING){
+      throw new ApiError(httpStatus.BAD_REQUEST, "Registration is not started yet")
+    }
+
+    let studentRegistration = await prisma.studentSemesterRegistration.findFirst({
+      where: {
+        student: {
+            id: studentInfo?.id
+          },
+          semesterRegistration : {
+              id: semesterRegistrationInfo?.id
+          }
+        }
+      })
+
+      if(!studentRegistration){
+        studentRegistration = await prisma.studentSemesterRegistration.create({
+          data: {
+            student: {
+              connect: {
+                id: studentInfo?.id
+              }
+            },
+            semesterRegistration : {
+              connect: {
+                id: semesterRegistrationInfo?.id
+              }
+            }
+          }
+        })
+      }
+  return {
+    studentRegistration,
+    student: studentInfo,
+    semesterRegistration: semesterRegistrationInfo,
+  }
+};
+
 export const SemesterRagistrationService = {
   createSemesterRegistration,
   getAllSemesterRegistrations,
   getSingleSemesterRegistration,
   updateSemesterRegistration,
   deleteSemesterRegistration,
+  createStartRegistration
 };
