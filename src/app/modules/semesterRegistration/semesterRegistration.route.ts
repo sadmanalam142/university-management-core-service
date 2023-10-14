@@ -29,6 +29,17 @@ router.post(
   auth(ENUM_USER_ROLE.STUDENT),
   SemesterRagistrationController.withdrawFromCourse
 );
+router.post(
+  '/confirm-registration',
+  auth(ENUM_USER_ROLE.STUDENT),
+  SemesterRagistrationController.confirmRegistration
+);
+router.post(
+  '/:id/start-new-semester',
+  SemesterRagistrationController.startNewSemester
+);
+
+router.get('/get-registrations', auth(ENUM_USER_ROLE.STUDENT), SemesterRagistrationController.getRegistrations);
 router.get('/', SemesterRagistrationController.getAllSemesterRegistrations);
 router.get('/:id', SemesterRagistrationController.getSingleSemesterRegistration);
 
@@ -38,6 +49,7 @@ router.patch(
   auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
   SemesterRagistrationController.updateSemesterRegistration
 );
+
 router.delete(
   '/:id',
   auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
