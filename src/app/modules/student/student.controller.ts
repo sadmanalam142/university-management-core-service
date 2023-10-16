@@ -20,8 +20,8 @@ const createStudent = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllStudents = catchAsync(async (req: Request, res: Response) => {
-  const filters = pick(req.query, studentFilterableFields)
-  const options = pick(req.query, paginationFields)
+  const filters = pick(req.query, studentFilterableFields);
+  const options = pick(req.query, paginationFields);
   const result = await StudentService.getAllStudents(filters, options);
 
   sendResponse<Student[]>(res, {
@@ -45,8 +45,8 @@ const getSingleStudent = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateStudent = catchAsync(async (req: Request, res: Response) => {
-  const id = req.params.id
-  const data = req.body
+  const id = req.params.id;
+  const data = req.body;
   const result = await StudentService.updateStudent(id, data);
 
   sendResponse<Student>(res, {
@@ -68,10 +68,49 @@ const deleteStudent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyCourses = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const filters = pick(req.query, ['courseId', 'academicSemesterId']);
+  const result = await StudentService.getMyCourses(user.userId, filters);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student courses fetched successfully !',
+    data: result,
+  });
+});
+
+const getMyCourseSchedules = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const filter = pick(req.query, ['courseId', 'academicSemesterId']);
+  const result = await StudentService.getMyCourseSchedules(user.userId, filter);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Course Schedules data fetched successfully',
+    data: result,
+  });
+});
+
+const myAcademicInfo = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const result = await StudentService.getMyAcademicInfo(user.userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'My Academic Info data fetched successfully',
+    data: result,
+  });
+});
+
 export const StudentController = {
   createStudent,
   getAllStudents,
   getSingleStudent,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  getMyCourses,
+  getMyCourseSchedules,
+  myAcademicInfo,
 };

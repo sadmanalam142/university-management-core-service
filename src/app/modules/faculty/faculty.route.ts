@@ -13,6 +13,7 @@ router.post(
   FacultyController.createFaculty
 );
 router.get('/', FacultyController.getAllFaculties);
+router.get('/my-courses', auth(ENUM_USER_ROLE.FACULTY), FacultyController.getMyCourses);
 router.get('/:id', FacultyController.getSingleFaculty);
 
 router.patch(

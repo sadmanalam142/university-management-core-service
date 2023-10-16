@@ -169,11 +169,25 @@ const getRegistrations = catchAsync(async (req: Request, res: Response) => {
 const startNewSemester = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await SemesterRagistrationService.startNewSemester(id);
-
+  
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'New Semester started successfully !',
+    data: result,
+  });
+});
+
+const getMySemesterRegCouses = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const result = await SemesterRagistrationService.getMySemesterRegCouses(
+    user.userId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student semester available courses data retrived successfully !',
     data: result,
   });
 });
@@ -190,4 +204,5 @@ export const SemesterRagistrationController = {
   confirmRegistration,
   getRegistrations,
   startNewSemester,
+  getMySemesterRegCouses
 };

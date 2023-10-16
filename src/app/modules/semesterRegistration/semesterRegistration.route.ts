@@ -41,6 +41,7 @@ router.post(
 
 router.get('/get-registrations', auth(ENUM_USER_ROLE.STUDENT), SemesterRagistrationController.getRegistrations);
 router.get('/', SemesterRagistrationController.getAllSemesterRegistrations);
+router.get('/get-available-courses', auth(ENUM_USER_ROLE.STUDENT), SemesterRagistrationController.getMySemesterRegCouses);
 router.get('/:id', SemesterRagistrationController.getSingleSemesterRegistration);
 
 router.patch(

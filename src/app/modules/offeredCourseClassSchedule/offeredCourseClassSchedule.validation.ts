@@ -1,25 +1,49 @@
 import { z } from "zod";
+import { daysInWeek } from "./offeredCourseClassSchedule.constant";
 
-const createOfferedCourseZodValidation = z.object({
+const timeStringSchema = z.string().refine(
+    (time) => {
+        const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        // example: 09:45, 21:30
+        return regex.test(time);
+    },
+    {
+        message: "Invalid time format, expected 'HH:MM' in 24-hour format"
+    }
+);
+
+const createOfferedCourseClassScheduleZodValidation = z
+.object({
     body: z.object({
-        academicDepartmentId: z.string({
-            required_error: "Academic Department Id is required"
+        dayOfWeek: z.enum([...daysInWeek] as [string, ...string[]], {
+            required_error: 'Day of week is required'
         }),
-        semesterRegistrationId: z.string({
-            required_error: "Semester Reg. is required"
+        startTime: timeStringSchema,
+        endTime: timeStringSchema,
+        roomId: z.string({
+            required_error: 'Room id is required'
         }),
-        courseIds: z.array(
-            z.string({
-                required_error: "Course Id is required"
-            }),
-            {
-                required_error: "Course Ids are required"
-            }
-        )
+        facultyId: z.string({
+            required_error: 'Faculty id is required'
+        }),
+        offeredCourseSectionId: z.string({
+            required_error: 'Section id is required'
+        })
     })
 })
+.refine(
+    ({ body }) => {
+        const start = new Date(`1970-01-01T${body.startTime}:00`);
+        const end = new Date(`1970-01-01T${body.endTime}:00`);
 
-const updateOfferedCourseZodValidation = z.object({
+        return start < end;
+    },
+    {
+        message: 'Start time must be before end time'
+    }
+);
+
+const updateOfferedCourseClassScheduleZodValidation = z.object({
     body: z.object({
         semesterRegistrationId: z.string().optional(),
         courseId: z.string().optional(),
@@ -27,9 +51,9 @@ const updateOfferedCourseZodValidation = z.object({
     })
 });
 
-export const OfferedCourseValidation = {
-    createOfferedCourseZodValidation,
-    updateOfferedCourseZodValidation
+export const OfferedCourseClassScheduleValidation = {
+    createOfferedCourseClassScheduleZodValidation,
+    updateOfferedCourseClassScheduleZodValidation
 }
 
-// yet to be done
+// concept not cleared
