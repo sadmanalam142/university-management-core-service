@@ -4,7 +4,8 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IAcademicDepartmentFilters } from './academicDepartment.interface';
-import { academicDepartmentSearchableFields } from './academicDepartment.constant';
+import { EVENT_ACADEMIC_DEPARTMENT_CREATED, EVENT_ACADEMIC_DEPARTMENT_DELETED, EVENT_ACADEMIC_DEPARTMENT_UPDATED, academicDepartmentSearchableFields } from './academicDepartment.constant';
+import { RedisClient } from '../../../shared/redis';
 
 const createDepartment = async (
   payload: AcademicDepartment
@@ -15,6 +16,15 @@ const createDepartment = async (
       academicFaculty: true,
     },
   });
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_CREATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 
@@ -103,6 +113,15 @@ const updateDepartment = async (
       academicFaculty: true,
     },
   });
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_UPDATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 
@@ -115,6 +134,15 @@ const deleteDepartment = async (id: string): Promise<AcademicDepartment> => {
       academicFaculty: true,
     },
   });
+  
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_DELETED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 

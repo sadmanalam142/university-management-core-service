@@ -4,7 +4,8 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IAcademicFacultyFilters } from './academicFaculty.interface';
-import { academicFacultySearchableFields } from './academicFaculty.constant';
+import { EVENT_ACADEMIC_FACULTY_CREATED, EVENT_ACADEMIC_FACULTY_DELETED, EVENT_ACADEMIC_FACULTY_UPDATED, academicFacultySearchableFields } from './academicFaculty.constant';
+import { RedisClient } from '../../../shared/redis';
 
 const createFaculty = async (
   payload: AcademicFaculty
@@ -12,6 +13,15 @@ const createFaculty = async (
   const result = await prisma.academicFaculty.create({
     data: payload
   })
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_FACULTY_CREATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 
@@ -91,6 +101,15 @@ const updateFaculty = async (
     },
     data: payload,
   });
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_FACULTY_UPDATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 
@@ -100,6 +119,15 @@ const deleteFaculty = async (id: string): Promise<AcademicFaculty> => {
       id,
     },
   });
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_FACULTY_DELETED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 

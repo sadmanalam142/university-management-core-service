@@ -4,14 +4,28 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IAcademicSemesterFilters } from './academicSemester.interface';
-import { academicSemesterSearchableFields } from './academicSemester.constant';
+import { EVENT_ACADEMIC_SEMESTER_CREATED, EVENT_ACADEMIC_SEMESTER_DELETED, EVENT_ACADEMIC_SEMESTER_UPDATED, academicSemesterSearchableFields, academicSemesterTitleCodeMapper } from './academicSemester.constant';
+import ApiError from '../../../errors/ApiError';
+import httpStatus from 'http-status';
+import { RedisClient } from '../../../shared/redis';
 
 const createSemester = async (
   payload: AcademicSemester
 ): Promise<AcademicSemester> => {
+  if (academicSemesterTitleCodeMapper[payload.title] !== payload.code) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid Semester Code!');
+  }
   const result = await prisma.academicSemester.create({
     data: payload
   })
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_CREATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
   return result;
 };
 
@@ -91,6 +105,15 @@ const updateSemester = async (
     },
     data: payload
   });
+
+  try {
+    if (result) {
+      await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_UPDATED, JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error('Error publishing to Redis:', error);
+  }
+
   return result;
 };
 
@@ -102,6 +125,15 @@ const deleteSemester = async (
         id,
       },
     });
+
+    try {
+      if (result) {
+        await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_DELETED, JSON.stringify(result));
+      }
+    } catch (error) {
+      console.error('Error publishing to Redis:', error);
+    }
+
     return result;
   };
 

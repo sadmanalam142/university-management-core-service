@@ -21,7 +21,7 @@ const createOfferedCourse = async (
   const { academicDepartmentId, semesterRegistrationId, courseIds } = payload;
   const result: OfferedCourse[] = [];
   await asyncForEach(courseIds, async (courseId: string) => {
-    const isAlreadyExist = prisma.offeredCourse.findFirst({
+    const isAlreadyExist = await prisma.offeredCourse.findFirst({
       where: {
         academicDepartmentId,
         semesterRegistrationId,
