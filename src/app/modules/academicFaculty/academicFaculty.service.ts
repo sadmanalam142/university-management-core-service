@@ -16,7 +16,9 @@ const createFaculty = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_FACULTY_CREATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -104,7 +106,9 @@ const updateFaculty = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_FACULTY_UPDATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -122,7 +126,9 @@ const deleteFaculty = async (id: string): Promise<AcademicFaculty> => {
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_FACULTY_DELETED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);

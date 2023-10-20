@@ -5,3 +5,8 @@ export const semesterRegistrationFilterableFields = [
 ];
 
 export const semesterRegistrationSearchableFields = [];
+
+export const semesterRegistrationRelationalFields: string[] = ['academicSemesterId'];
+export const semesterRegistrationRelationalFieldsMapper: { [key: string]: string } = {
+    academicSemesterId: 'academicSemester'
+};

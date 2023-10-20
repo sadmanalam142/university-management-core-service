@@ -32,39 +32,41 @@ const getAllOfferedCourseClassSchedules = async (
 ): Promise<IGenericResponse<OfferedCourseClassSchedule[]>> => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, ...filterData } = filters;
   const andConditions = [];
 
   // Issue: searchTerm not working
   if (searchTerm) {
     andConditions.push({
-      OR: offeredCourseClassScheduleSearchableFields.map(field => ({
-        [field]: {
-          contains: searchTerm,
-          mode: 'insensitive',
-        },
-      })),
+        OR: offeredCourseClassScheduleSearchableFields.map((field) => ({
+            [field]: {
+                contains: searchTerm,
+                mode: 'insensitive'
+            }
+        }))
     });
-  }
-  if (Object.keys(filtersData).length > 0) {
+}
+
+if (Object.keys(filterData).length > 0) {
     andConditions.push({
-        AND: Object.keys(filtersData).map((key) => {
+        AND: Object.keys(filterData).map((key) => {
             if (offeredCourseClassScheduleRelationalFields.includes(key)) {
                 return {
                     [offeredCourseClassScheduleRelationalFieldsMapper[key]]: {
-                        id: (filtersData as any)[key]
+                        id: (filterData as any)[key]
                     }
                 };
             } else {
                 return {
                     [key]: {
-                        equals: (filtersData as any)[key]
+                        equals: (filterData as any)[key]
                     }
                 };
             }
         })
     });
 }
+
   const whereConditions: Prisma.OfferedCourseClassScheduleWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
   const result = await prisma.offeredCourseClassSchedule.findMany({

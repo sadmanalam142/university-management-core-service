@@ -4,7 +4,7 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IAcademicDepartmentFilters } from './academicDepartment.interface';
-import { EVENT_ACADEMIC_DEPARTMENT_CREATED, EVENT_ACADEMIC_DEPARTMENT_DELETED, EVENT_ACADEMIC_DEPARTMENT_UPDATED, academicDepartmentSearchableFields } from './academicDepartment.constant';
+import { EVENT_ACADEMIC_DEPARTMENT_CREATED, EVENT_ACADEMIC_DEPARTMENT_DELETED, EVENT_ACADEMIC_DEPARTMENT_UPDATED, academicDepartmentRelationalFields, academicDepartmentRelationalFieldsMapper, academicDepartmentSearchableFields } from './academicDepartment.constant';
 import { RedisClient } from '../../../shared/redis';
 
 const createDepartment = async (
@@ -19,7 +19,9 @@ const createDepartment = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_CREATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -34,27 +36,40 @@ const getAllDepartments = async (
 ): Promise<IGenericResponse<AcademicDepartment[]>> => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, ...filterData } = filters;
   const andConditions = [];
+
   if (searchTerm) {
     andConditions.push({
-      OR: academicDepartmentSearchableFields.map(field => ({
-        [field]: {
-          contains: searchTerm,
-          mode: 'insensitive',
-        },
-      })),
+        OR: academicDepartmentSearchableFields.map((field) => ({
+            [field]: {
+                contains: searchTerm,
+                mode: 'insensitive'
+            }
+        }))
     });
-  }
-  if (Object.keys(filtersData).length) {
+}
+
+if (Object.keys(filterData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filtersData).map(key => ({
-        [key]: {
-          equals: (filtersData as any)[key],
-        },
-      })),
+        AND: Object.keys(filterData).map((key) => {
+            if (academicDepartmentRelationalFields.includes(key)) {
+                return {
+                    [academicDepartmentRelationalFieldsMapper[key]]: {
+                        id: (filterData as any)[key]
+                    }
+                };
+            } else {
+                return {
+                    [key]: {
+                        equals: (filterData as any)[key]
+                    }
+                };
+            }
+        })
     });
-  }
+}
+
   const whereConditions: Prisma.AcademicDepartmentWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
   const result = await prisma.academicDepartment.findMany({
@@ -116,7 +131,9 @@ const updateDepartment = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_UPDATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -137,7 +154,9 @@ const deleteDepartment = async (id: string): Promise<AcademicDepartment> => {
   
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_DEPARTMENT_DELETED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);

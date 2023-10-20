@@ -5,7 +5,7 @@ const createAcademicSemesterZodSchema = z.object({
       title: z.string({
         required_error: 'title is required',
       }),
-      year: z.string({
+      year: z.number({
         required_error: 'year is required',
       }),
       code: z.string({
@@ -23,7 +23,7 @@ const createAcademicSemesterZodSchema = z.object({
 const updateAcademicSemesterZodSchema = z.object({
     body: z.object({
       title: z.string().optional(),
-      year: z.string().optional(),
+      year: z.number().optional(),
       code: z.string().optional(),
       startMonth: z.string().optional(),
       endMonth: z.string().optional(),

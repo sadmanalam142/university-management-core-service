@@ -4,7 +4,7 @@ import { IPaginationOptions } from '../../../interfaces/pagination';
 import { IGenericResponse } from '../../../interfaces/common';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IClassSchedule, IOfferedCourseSectionCreate, IOfferedCourseSectionFilters } from './offeredCourseSection.interface';
-import { offeredCourseSectionSearchableFields } from './offeredCourseSection.constant';
+import { offeredCourseSectionRelationalFields, offeredCourseSectionRelationalFieldsMapper, offeredCourseSectionSearchableFields } from './offeredCourseSection.constant';
 import ApiError from '../../../errors/ApiError';
 import httpStatus from 'http-status';
 import { asyncForEach } from '../../../shared/utils';
@@ -101,27 +101,40 @@ const getAllOfferedCourseSections = async (
 ): Promise<IGenericResponse<OfferedCourseSection[]>> => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, ...filterData } = filters;
   const andConditions = [];
+
   if (searchTerm) {
-    andConditions.push({
-      OR: offeredCourseSectionSearchableFields.map(field => ({
-        [field]: {
-          contains: searchTerm,
-          mode: 'insensitive',
-        },
-      })),
-    });
-  }
-  if (Object.keys(filtersData).length) {
-    andConditions.push({
-      AND: Object.keys(filtersData).map(key => ({
-        [key]: {
-          equals: (filtersData as any)[key],
-        },
-      })),
-    });
-  }
+        andConditions.push({
+            OR: offeredCourseSectionSearchableFields.map((field) => ({
+                [field]: {
+                    contains: searchTerm,
+                    mode: 'insensitive'
+                }
+            }))
+        });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+        andConditions.push({
+            AND: Object.keys(filterData).map((key) => {
+                if (offeredCourseSectionRelationalFields.includes(key)) {
+                    return {
+                        [offeredCourseSectionRelationalFieldsMapper[key]]: {
+                            id: (filterData as any)[key]
+                        }
+                    };
+                } else {
+                    return {
+                        [key]: {
+                            equals: (filterData as any)[key]
+                        }
+                    };
+                }
+            })
+        });
+    }
+
   const whereConditions: Prisma.OfferedCourseSectionWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
   const result = await prisma.offeredCourseSection.findMany({

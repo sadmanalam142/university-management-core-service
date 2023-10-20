@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { daysInWeek } from "./offeredCourseClassSchedule.constant";
+import { daysInWeek } from "../offeredCourseSection/offeredCourseSection.constant";
 
 const timeStringSchema = z.string().refine(
     (time) => {

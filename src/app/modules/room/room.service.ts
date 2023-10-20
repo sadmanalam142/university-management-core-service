@@ -4,7 +4,7 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IRoomFilters } from './room.interface';
-import { roomSearchableFields } from './room.constant';
+import { roomRelationalFields, roomRelationalFieldsMapper, roomSearchableFields } from './room.constant';
 
 const createRoom = async (payload: Room): Promise<Room> => {
   const result = await prisma.room.create({
@@ -22,27 +22,40 @@ const getAllRooms = async (
 ): Promise<IGenericResponse<Room[]>> => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, ...filterData } = filters;
   const andConditions = [];
+  
   if (searchTerm) {
     andConditions.push({
-      OR: roomSearchableFields.map(field => ({
-        [field]: {
-          contains: searchTerm,
-          mode: 'insensitive',
-        },
-      })),
+        OR: roomSearchableFields.map((field) => ({
+            [field]: {
+                contains: searchTerm,
+                mode: 'insensitive'
+            }
+        }))
     });
-  }
-  if (Object.keys(filtersData).length) {
+}
+
+if (Object.keys(filterData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filtersData).map(key => ({
-        [key]: {
-          equals: (filtersData as any)[key],
-        },
-      })),
+        AND: Object.keys(filterData).map((key) => {
+            if (roomRelationalFields.includes(key)) {
+                return {
+                    [roomRelationalFieldsMapper[key]]: {
+                        id: (filterData as any)[key]
+                    }
+                };
+            } else {
+                return {
+                    [key]: {
+                        equals: (filterData as any)[key]
+                    }
+                };
+            }
+        })
     });
-  }
+}
+
   const whereConditions: Prisma.RoomWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
   const result = await prisma.room.findMany({

@@ -1,10 +1,13 @@
-import { ExamType, PrismaClient, StudentEnrolledCourseStatus } from "@prisma/client"
+import { ExamType, PrismaClient, StudentEnrolledCourseMark, StudentEnrolledCourseStatus } from "@prisma/client"
 import { DefaultArgs, PrismaClientOptions } from "@prisma/client/runtime/library"
-import prisma from "../../../shared/prisma"
-import ApiError from "../../../errors/ApiError"
 import httpStatus from "http-status"
+import ApiError from "../../../errors/ApiError"
+import { paginationHelpers } from "../../../helpers/paginationHelper"
+import { IGenericResponse } from "../../../interfaces/common"
+import { IPaginationOptions } from "../../../interfaces/pagination"
+import prisma from "../../../shared/prisma"
+import { IStudentEnrolledCourseMarkFilterRequest } from "./StudentEnrolledCourseMark.interface"
 import { StudentEnrolledCourseMarkUtils } from "./studentEnrolledCourseMark.utils"
-import { IUpdateStudentCourseFinalMarksPayload, IUpdateStudentMarksPayload } from "./StudentEnrolledCourseMark.interface"
 
 const createStudentEnrolledCourseDefaultMark = async (
     prismaClient: Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">,
@@ -90,7 +93,48 @@ const createStudentEnrolledCourseDefaultMark = async (
     }
 }
 
-const updateStudentMarks = async (payload: IUpdateStudentMarksPayload) => {
+const getAllFromDB = async (
+    filters: IStudentEnrolledCourseMarkFilterRequest,
+    options: IPaginationOptions
+): Promise<IGenericResponse<StudentEnrolledCourseMark[]>> => {
+    const { limit, page } = paginationHelpers.calculatePagination(options);
+
+    const marks = await prisma.studentEnrolledCourseMark.findMany({
+        where: {
+            student: {
+                id: filters.studentId
+            },
+            academicSemester: {
+                id: filters.academicSemesterId
+            },
+            studentEnrolledCourse: {
+                course: {
+                    id: filters.courseId
+                }
+            }
+        },
+        include: {
+            studentEnrolledCourse: {
+                include: {
+                    course: true
+                }
+            },
+            student: true
+        }
+    });
+
+    return {
+        meta: {
+            total: marks.length,
+            page,
+            limit
+        },
+        data: marks
+    };
+};
+
+const updateStudentMarks = async (payload: any) => {
+    console.log(payload)
     const { studentId, academicSemesterId, courseId, examType, marks } = payload;
 
     const studentEnrolledCourseMarks = await prisma.studentEnrolledCourseMark.findFirst({
@@ -128,7 +172,7 @@ const updateStudentMarks = async (payload: IUpdateStudentMarksPayload) => {
     return updateStudentMarks;
 }
 
-const updateFinalMarks = async (payload: IUpdateStudentCourseFinalMarksPayload) => {
+const updateFinalMarks = async (payload: any) => {
     const { studentId, academicSemesterId, courseId } = payload;
     const studentEnrolledCourse = await prisma.studentEnrolledCourse.findFirst({
         where: {
@@ -148,6 +192,7 @@ const updateFinalMarks = async (payload: IUpdateStudentCourseFinalMarksPayload) 
         throw new ApiError(httpStatus.BAD_REQUEST, "Student enrolled course data not found!")
     }
 
+    //console.log(studentEnrolledCourse)
     const studentEnrolledCourseMarks = await prisma.studentEnrolledCourseMark.findMany({
         where: {
             student: {
@@ -164,12 +209,14 @@ const updateFinalMarks = async (payload: IUpdateStudentCourseFinalMarksPayload) 
         }
     });
 
+    //console.log(studentEnrolledCourseMarks)
     if (!studentEnrolledCourseMarks.length) {
         throw new ApiError(httpStatus.BAD_REQUEST, "student enrolled course mark not found!")
     }
 
     const midTermMarks = studentEnrolledCourseMarks.find((item) => item.examType === ExamType.MIDTERM)?.marks || 0;
     const finalTermMarks = studentEnrolledCourseMarks.find((item) => item.examType === ExamType.FINAL)?.marks || 0;
+    //console.log(midTermMarks, finalTermMarks)
 
     const totalFinalMarks = Math.ceil(midTermMarks * 0.4) + Math.ceil(finalTermMarks * 0.6);
     const result = StudentEnrolledCourseMarkUtils.getGradeFromMarks(totalFinalMarks)
@@ -245,8 +292,60 @@ const updateFinalMarks = async (payload: IUpdateStudentCourseFinalMarksPayload) 
     return grades;
 };
 
+const getMyCourseMarks = async (
+    filters: IStudentEnrolledCourseMarkFilterRequest,
+    options: IPaginationOptions,
+    authUser: any
+): Promise<IGenericResponse<StudentEnrolledCourseMark[]>> => {
+    const { limit, page, } = paginationHelpers.calculatePagination(options);
+
+    const student = await prisma.student.findFirst({
+        where: {
+            studentId: authUser.id
+        }
+    });
+
+    if (!student) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Student not found');
+    }
+
+    const marks = await prisma.studentEnrolledCourseMark.findMany({
+        where: {
+            student: {
+                id: student.id
+            },
+            academicSemester: {
+                id: filters.academicSemesterId
+            },
+            studentEnrolledCourse: {
+                course: {
+                    id: filters.courseId
+                }
+            }
+        },
+        include: {
+            studentEnrolledCourse: {
+                include: {
+                    course: true
+                }
+            }
+        }
+    });
+
+    return {
+        meta: {
+            total: marks.length,
+            page,
+            limit
+        },
+        data: marks
+    };
+};
+
 export const StudentEnrolledCourseMarkService = {
     createStudentEnrolledCourseDefaultMark,
+    getAllFromDB,
     updateStudentMarks,
-    updateFinalMarks
+    updateFinalMarks,
+    getMyCourseMarks
 }

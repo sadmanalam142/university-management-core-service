@@ -14,6 +14,11 @@ router.post(
 );
 router.get('/', FacultyController.getAllFaculties);
 router.get('/my-courses', auth(ENUM_USER_ROLE.FACULTY), FacultyController.getMyCourses);
+router.get(
+  '/my-course-students',
+  auth(ENUM_USER_ROLE.FACULTY),
+  FacultyController.getMyCourseStudents
+);
 router.get('/:id', FacultyController.getSingleFaculty);
 
 router.patch(
@@ -28,8 +33,8 @@ router.delete(
   FacultyController.deleteFaculty
 );
 
-router.post('/:id/assign-courses', FacultyController.assignCourses)
-router.delete('/:id/remove-courses', FacultyController.removeCourses)
+router.post('/:id/assign-courses', auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN), FacultyController.assignCourses)
+router.delete('/:id/remove-courses', auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN), FacultyController.removeCourses)
 
 export const FacultyRoutes = {
   router,

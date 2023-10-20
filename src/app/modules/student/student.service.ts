@@ -4,7 +4,11 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IStudentFilters } from './student.interface';
-import { studentSearchableFields } from './student.constant';
+import {
+  studentRelationalFields,
+  studentRelationalFieldsMapper,
+  studentSearchableFields,
+} from './student.constant';
 import { StudentUtils } from './student.utils';
 
 const createStudent = async (payload: Student): Promise<Student> => {
@@ -37,13 +41,24 @@ const getAllStudents = async (
       })),
     });
   }
-  if (Object.keys(filtersData).length) {
+
+  if (Object.keys(filtersData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filtersData).map(key => ({
-        [key]: {
-          equals: (filtersData as any)[key],
-        },
-      })),
+      AND: Object.keys(filtersData).map(key => {
+        if (studentRelationalFields.includes(key)) {
+          return {
+            [studentRelationalFieldsMapper[key]]: {
+              id: (filtersData as any)[key],
+            },
+          };
+        } else {
+          return {
+            [key]: {
+              equals: (filtersData as any)[key],
+            },
+          };
+        }
+      }),
     });
   }
   const whereConditions: Prisma.StudentWhereInput =
@@ -122,6 +137,7 @@ const deleteStudent = async (id: string): Promise<Student> => {
       academicDepartment: true,
     },
   });
+
   return result;
 };
 
@@ -254,6 +270,72 @@ const getMyAcademicInfo = async (authUserId: string): Promise<any> => {
   };
 };
 
+const createStudentFromEvent = async (e: any) => {
+  const studentData: Partial<Student> = {
+    studentId: e.id,
+    firstName: e.name.firstName,
+    lastName: e.name.lastName,
+    middleName: e.name.middleName,
+    email: e.email,
+    contactNo: e.contactNo,
+    gender: e.gender,
+    bloodGroup: e.bloodGroup,
+    academicSemesterId: e.academicSemester.syncId,
+    academicDepartmentId: e.academicDepartment.syncId,
+    academicFacultyId: e.academicFaculty.syncId,
+  };
+
+  await createStudent(studentData as Student);
+};
+
+const updateStudentFromEvent = async (e: any): Promise<void> => {
+  const isExist = await prisma.student.findFirst({
+    where: {
+      studentId: e.id,
+    },
+  });
+
+  if (!isExist) {
+    await createStudentFromEvent(e);
+    return;
+  } else {
+    const student: Partial<Student> = {
+      studentId: e.id,
+      firstName: e.name.firstName,
+      lastName: e.name.lastName,
+      middleName: e.name.middleName,
+      profileImage: e.profileImage,
+      email: e.email,
+      contactNo: e.contactNo,
+      gender: e.gender,
+      bloodGroup: e.bloodGroup,
+      academicDepartmentId: e.academicDepartment.syncId,
+      academicFacultyId: e.academicFaculty.syncId,
+      academicSemesterId: e.academicSemester.syncId,
+    };
+    await prisma.student.updateMany({
+      where: {
+        studentId: e.id,
+      },
+      data: student as Student,
+    });
+  }
+};
+
+const deleteStudentFromEvent = async (syncId: string): Promise<void> => {
+  const result = await prisma.student.findFirst({
+    where: {
+      studentId: syncId,
+    },
+  });
+  const id = result?.id;
+  await prisma.student.delete({
+    where: {
+      id
+    },
+  });
+};
+
 export const StudentService = {
   createStudent,
   getAllStudents,
@@ -263,4 +345,7 @@ export const StudentService = {
   getMyCourses,
   getMyCourseSchedules,
   getMyAcademicInfo,
+  createStudentFromEvent,
+  updateStudentFromEvent,
+  deleteStudentFromEvent,
 };

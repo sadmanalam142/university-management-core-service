@@ -1,0 +1,37 @@
+Sat Oct 21 2023 2:11:8 } [PH] error: AcademicSemester is not defined
+Sat Oct 21 2023 2:14:50 } [PH] error: 
+Invalid `prisma.student.delete()` invocation:
+
+{
+  where: {
+?   id?: String,
+?   AND?: StudentWhereInput | StudentWhereInput[],
+?   OR?: StudentWhereInput[],
+?   NOT?: StudentWhereInput | StudentWhereInput[],
+?   studentId?: StringFilter | String,
+?   firstName?: StringFilter | String,
+?   lastName?: StringFilter | String,
+?   middleName?: StringFilter | String,
+?   profileImage?: StringNullableFilter | String | Null,
+?   email?: StringFilter | String,
+?   contactNo?: StringFilter | String,
+?   gender?: StringFilter | String,
+?   bloodGroup?: StringFilter | String,
+?   createdAt?: DateTimeFilter | DateTime,
+?   updatedAt?: DateTimeFilter | DateTime,
+?   academicSemesterId?: StringFilter | String,
+?   academicFacultyId?: StringFilter | String,
+?   academicDepartmentId?: StringFilter | String,
+?   academicSemester?: AcademicSemesterRelationFilter | AcademicSemesterWhereInput,
+?   academicFaculty?: AcademicFacultyRelationFilter | AcademicFacultyWhereInput,
+?   academicDepartment?: AcademicDepartmentRelationFilter | AcademicDepartmentWhereInput,
+?   studentSemesterRegistrations?: StudentSemesterRegistrationListRelationFilter,
+?   studentSemesterRegistrationCourses?: StudentSemesterRegistrationCourseListRelationFilter,
+?   studentSemesterPayments?: StudentSemesterPaymentListRelationFilter,
+?   studentEnrolledCourses?: StudentEnrolledCourseListRelationFilter,
+?   studentEnrolledCourseMarks?: StudentEnrolledCourseMarkListRelationFilter,
+?   studentAcademicInfos?: StudentAcademicInfoListRelationFilter
+  }
+}
+
+Argument `where` of type StudentWhereUniqueInput needs at least one of `id` arguments. Available options are marked with ?.

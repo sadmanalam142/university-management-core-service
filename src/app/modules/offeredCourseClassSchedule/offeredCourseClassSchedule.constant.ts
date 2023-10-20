@@ -1,12 +1,3 @@
-export const offeredCourseClassScheduleFilterableFields = [
-  'searchTerm',
-  'dayOfWeek',
-  'offeredCourseSectionId',
-  'semesterRegistrationId',
-  'roomId',
-  'facultyId',
-];
-
 export const offeredCourseClassScheduleSearchableFields = ['dayOfWeek'];
 
 export const offeredCourseClassScheduleRelationalFields = [
@@ -23,14 +14,14 @@ export const offeredCourseClassScheduleRelationalFieldsMapper: { [key: string]: 
     semesterRegistrationId: 'semesterRegistration'
 }
 
-export const daysInWeek = [
-  'SATURDAY',
-  'SUNDAY',
-  'MONDAY',
-  'TUESDAY',
-  'WEDNESDAY',
-  'THURSDAY',
-  'FRIDAY'
-];
+
+export const offeredCourseClassScheduleFilterableFields = [
+    'searchTerm',
+    'dayOfWeek',
+    'offeredCourseSectionId',
+    'semesterRegistrationId',
+    'roomId',
+    'facultyId'
+]
 
 

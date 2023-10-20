@@ -21,7 +21,9 @@ const createSemester = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_CREATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -108,7 +110,9 @@ const updateSemester = async (
 
   try {
     if (result) {
+      await RedisClient.connect();
       await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_UPDATED, JSON.stringify(result));
+      await RedisClient.disconnect();
     }
   } catch (error) {
     console.error('Error publishing to Redis:', error);
@@ -128,7 +132,9 @@ const deleteSemester = async (
 
     try {
       if (result) {
+        await RedisClient.connect();
         await RedisClient.publish(EVENT_ACADEMIC_SEMESTER_DELETED, JSON.stringify(result));
+        await RedisClient.disconnect();
       }
     } catch (error) {
       console.error('Error publishing to Redis:', error);
